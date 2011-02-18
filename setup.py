@@ -6,7 +6,7 @@ Simple, multilingual natural language tools.
 This package accomplishes many basic NLP tasks without dependencies on NLTK or parsers, for use in projects such as ConceptNet.
 """
 
-version_str = '1.0.0'
+version_str = '0.9.0'
 
 try:
     from setuptools import setup, Extension
