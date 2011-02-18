@@ -1,0 +1,4 @@
+prune simplenlp/mblem/en_unlem
+prune simplenlp/lemmatize/setup
+recursive-include simplenlp *.txt
+include simplenlp/mblem/*.pickle
