@@ -1,0 +1,5 @@
+Authors: Rob Speer, Kenneth Arnold, and Tyson Roberts
+
+This module was recently split off from the `csc.nl` package in ConceptNet.
+Until we update things, its documentation is still at: http://csc.media.mit.edu/docs/conceptnet/nl.html
+
