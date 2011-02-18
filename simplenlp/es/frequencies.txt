@@ -1,0 +1,6 @@
+siempre
+usualmente
+frecuentamente
+raramente
+no
+nunca
