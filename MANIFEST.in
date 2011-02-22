@@ -1,0 +1,4 @@
+prune nl/mblem/en_unlem
+prune nl/lemmatize/setup
+recursive-include nl *.txt
+include nl/mblem/*.pickle
