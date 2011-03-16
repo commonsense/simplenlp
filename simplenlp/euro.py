@@ -358,6 +358,17 @@ class LemmatizedEuroNL(EuroNL):
             return (lemma, residue)
         except IndexError:
             return (word, u'')
+    
+    def tokenize_and_correct(self, text):
+        """
+        Apply autocorrection to a text while splitting it into tokens.
+        """
+        text = self.tokenize(text)
+        words1 = text.replace('/', ' ').split()
+        words2 = [w.lower() for w in words1]
+        words3 = [self.autocorrect.get(word, word) for word in words2]
+        words = self.tokenize(' '.join(words3)).split()
+        return words
         
     def lemma_split(self, text, keep_stopwords=False):
         """
@@ -377,23 +388,17 @@ class LemmatizedEuroNL(EuroNL):
         Autocorrections that are defined for the language are applied in this
         step:
 
-            >>> en_nl.lemma_split("this isnt spelled rigth")
+            >>> en_nl.lemma_split("this isnt ,spelled rigth")
             (u'not spell right', u'this is 1 2ed 3')
 
         If ``keep_stopwords`` is set, or if all words are stopwords,
         then stopword removal is skipped.
         """
         if not isinstance(text, unicode): text = text.decode('utf-8')
-        text = self.tokenize(text)
-        words1 = text.replace('/', ' ').split()
-        words2 = [self.autocorrect.get(word, word) for word in words1]
-        words = self.tokenize(' '.join(words2)).split()
+        words = self.tokenize_and_correct(text)
 
-        punct = string.punctuation.replace("'", "").replace('-', '').replace("`", "")
-        
-        words = [w.strip(punct).lower() for w in words]
-        words = [self.autocorrect.get(word, word) for word in words if word]
-        lemma_tuples = [self.word_split(word) for word in words]
+        punct = string.punctuation.replace("'", "").replace('-', '').replace("`", "")        
+        lemma_tuples = [self.word_split(word.strip(punct)) for word in words]
         lemmas_pre = []
         residue_pre = []
         lemma_index = 0
