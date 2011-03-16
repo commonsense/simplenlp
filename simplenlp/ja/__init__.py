@@ -41,9 +41,6 @@ class JaNL(NLTools):
         except KeyboardInterrupt, e:
             raise e
 
-        except:
-            raise RuntimeError("Tree construction error based on input: " + ja_dec(stuff))
-
         raise ValueError("Bad argument to a csc.nl.ja function.")
 
     def is_stopword(self, word):

@@ -1,5 +1,5 @@
 #python-encoding: UTF-8
-
+from conceptnet.models import Language, Sentence
 from simplenlp.ja.system import *
 from simplenlp.ja.debug  import *
 import operator
@@ -14,7 +14,7 @@ assert_on_fail = True
 use_color      = True
 
 ## Variables #######################################################################################
-ja           = get_lang('ja')
+ja           = Language.get('ja')
 ja_nl        = ja.nl
 d            = JaDebug(use_color)
 i            = "\t"
