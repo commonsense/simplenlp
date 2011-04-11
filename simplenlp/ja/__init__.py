@@ -44,13 +44,14 @@ class JaNL(NLTools):
         raise ValueError("Bad argument to a csc.nl.ja function.")
 
     def is_stopword(self, word):
-        ''' Returns whether or not the given word is a stopword '''
+        '''Returns whether or not the given word is a stopword. If the
+        given text falls apart into multiple words, it will check the
+        first.'''
 
         words = self.utterance(word).words
         if len(words) == 0:
-            raise ValueError("Could not find a word to check.")
-        elif len(words) > 1:
-            raise ValueError("Multiple words found.")
+            # it's empty -- might as well be a stopword.
+            return True
 
         return words[0].is_stopword
 
