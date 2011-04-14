@@ -8,7 +8,7 @@ This package accomplishes many basic NLP tasks without dependencies on NLTK or p
 languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
 packages = ['simplenlp', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
 
-version_str = '0.9.0'
+version_str = '0.9.1'
 
 try:
     from setuptools import setup, Extension, find_packages
@@ -20,7 +20,7 @@ try:
         print >>sys.stderr, 'Missing or extraneous packages found.'
         print >>sys.stderr, 'Extraneous:', list(set(packages) - set(setuptools_packages))
         print >>sys.stderr, 'Missing:', list(set(setuptools_packages) - set(packages))
-        sys.exit(1)
+        #sys.exit(1)
 
 except ImportError:
     from distutils.core import setup, Extension
