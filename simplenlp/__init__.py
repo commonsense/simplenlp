@@ -1,8 +1,18 @@
 import codecs
 import os
+import unicodedata
 
 cached_nl = {}
 nl_base = os.path.dirname(__file__)
+
+# Make a mapping from control characters to reasonable things.
+CONTROL_CHARS = {}
+for i in xrange(256):
+    if unicodedata.category(unichr(i)) == 'Cc':
+        CONTROL_CHARS[unichr(i)] = None
+
+CONTROL_CHARS['\t'] = ' '
+CONTROL_CHARS['\n'] = ' '
 
 def get_wordlist(lang, listname):
     try:
@@ -46,7 +56,7 @@ class NLTools(object):
     An NLTools object provides methods for dealing with natural language text
     in a particular language.
 
-    So far, we have three classes of languages:
+    So far, we have four classes of languages:
     
     * "Lemmatized" languages are languages where we have an MBLEM lemmatizer
       for removing or adding inflections to words. So far, this is just
@@ -54,8 +64,11 @@ class NLTools(object):
     * "Stemmed" languages are languages where we rely on a Snowball (Porter)
       stemmer to remove inflections from words. As there is a Snowball stemmer
       for most European languages, we treat most of them as stemmed languages.
+    * "External" languages are handled with an external tool that we assume
+      is installed. Japanese is an external language, using the command-line
+      version of MeCab.
     * "Default" languages are ones where we don't really know how to implement
-      any NLP tools yet. All the methods perform trivial operations. Japanese,
+      any NLP tools yet. All the methods perform trivial operations.
       Korean, Chinese, and Arabic are currently "default" languages.
     
     With an NLTools object, you can perform these operations:
@@ -93,4 +106,26 @@ class DefaultNL(NLTools):
         return lemmas
     def tokenize(self, text):
         return text
+    
+def preprocess_text(text):
+    """
+    Given any basestring as input, make its representation consistent:
+
+    - Ensure that it is a Unicode string, converting from UTF-8 if
+      necessary.
+    - Normalize it with Unicode normalization form KC, which applies the
+      following relevant transformations:
+      - Combines characters and diacritics that are written using separate
+        code points, such as converting "ka" plus a dakuten into the
+        single character "ga".
+      - Replaces characters that are functionally equivalent with the most
+        common form: for example, half-width katakana will be replaced with
+        full-width, and full-width Roman characters will be replaced with
+        ASCII characters.
+    - Replace newlines and tabs with spaces.
+    - Remove all other control characters.
+    """
+    if isinstance(text, str):
+        text = text.decode('utf-8', 'replace')
+    return unicodedata.normalize('NFKC', text.translate(CONTROL_CHARS))
 

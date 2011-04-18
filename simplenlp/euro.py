@@ -1,5 +1,6 @@
 import string
-from simplenlp import NLTools, get_nl, get_wordlist, get_mapping
+from simplenlp import NLTools, get_nl, get_wordlist, get_mapping,\
+                      preprocess_text
 import re
 
 def doctest_globals():
@@ -108,7 +109,7 @@ class EuroNL(NLTools):
             True
 
         """
-        step0 = text.replace('\r', '').replace('\n', ' ')
+        step0 = preprocess_text(text).replace('\r', '').replace('\n', ' ')
         step1 = step0.replace(" '", " ` ").replace("'", " '").replace("n 't", 
         " n't").replace("cannot", "can not")
         step2 = re.sub('"([^"]*)"', r" `` \1 '' ", step1)
@@ -140,7 +141,7 @@ class EuroNL(NLTools):
 
         In a EuroNL, by default, this puts those characters in lowercase.
         """
-        return word.lower()
+        return preprocess_text(word).lower()
 
     def is_stopword(self, word):
         """

@@ -1,177 +1,138 @@
-#python-encoding: UTF-8
+# -*- coding: utf-8 -*-
+from csc.nl import DefaultNL, preprocess_text
+import subprocess
 
-try:
-    import MeCab
-except ImportError:
-    raise ImportError("""
-You do not have the MeCab library available, so you cannot use the Japanese
-NLTools.
+# MeCab outputs the part of speech of its terms. We can simply identify
+# particular (coarse or fine) parts of speech as containing stopwords.
 
-See csc/nl/ja/README.TXT for instructions on how to set up MeCab.""")
-from csc.nl import NLTools, get_nl
-from csc.nl.ja.parser import JaParser
-from csc.nl.ja.tree import JaLanguageNode
-from csc.nl.ja.util import ja_enc, ja_dec
-from csc.nl.ja.word import JaWord
-import string
-import re
+STOPWORD_CATEGORIES = set([
+    u'助詞',          # coarse: particle
+    u'連体詞',        # coarse: adnominal adjective ("rentaishi")
+    u'助動詞',        # coarse: auxiliary verb
+    u'接続詞',        # coarse: conjunction
+    u'フィラー',      # coarse: filler
+    u'記号',          # coarse: symbol
+    u'助詞類接続',    # fine: particle connection
+    u'代名詞',        # fine: pronoun
+    u'接尾',          # fine: suffix
+])
+
+# Forms of particular verbs are also stopwords.
+#
+# A thought: Should the rare kanji version of suru not be a stopword?
+# I'll need to ask someone who knows more Japanese, but it may be
+# that if they're using the kanji it's for particular emphasis.
+STOPWORD_VERBS = set([
+    u'する',          # suru: to do
+    u'為る',          # suru in kanji (very rare)
+    u'くる',          # kuru: to come
+    u'来る',          # kuru in kanji
+    u'いく',          # iku: to go
+    u'行く',          # iku in kanji
+])
+
+class MeCabNL(DefaultNL):
+    """
+    Handle Japanese text using the command-line version of MeCab.
+    (mecab-python is convenient, but its installer is too flaky to rely on.)
+
+    ja_cabocha gives more sophisticated results, but requires a large number of
+    additional dependencies. Using this tool for Japanese requires only
+    MeCab to be installed and accepting UTF-8 text.
+    """
+    def __init__(self):
+        """
+        Create a MeCabNL object by opening a pipe to the mecab command.
+        """
+        self.mecab = subprocess.Popen(['mecab'], shell=True, bufsize=1, close_fds=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    
+    def __del__(self):
+        """
+        Clean up by closing the pipe.
+        """
+        self.mecab.stdin.close()
+        del self.mecab
+    
+    def analyze(self, text):
+        """
+        Runs a line of text through MeCab, and returns the results as a
+        list of lists.
+        """
+        text = preprocess_text(text).encode('utf-8')
+        self.mecab.stdin.write(text+'\n')
+        results = []
+        out_line = ''
+        while True:
+            out_line = self.mecab.stdout.readline()
+            if out_line == 'EOS\n':
+                break
+            word, info = out_line.strip('\n').split('\t')
+            record = [word] + info.split(',')
+            unicode_record = [entry.decode('utf-8') for entry in record]
+            results.append(unicode_record)
+        return results
+
+    def tokenize_list(self, text):
+        """
+        Split a text into separate words.
+        
+        This does not de-agglutinate as much as ja_cabocha does, but the words
+        where they differ are likely to be stopwords anyway.
+        """
+        return [record[0] for record in self.analyze(text)]
+
+    def tokenize(self, text):
+        """
+        Split a text into words separated by spaces (due to our overly
+        Eurocentric design decision).
+        """
+        return u' '.join(self.tokenize_list(text))
+    
+    def _is_stopword_record(self, record):
+        """
+        Determine whether a single MeCab record represents a stopword.
+        """
+        return (record[1] in STOPWORD_CATEGORIES or
+                record[2] in STOPWORD_CATEGORIES or
+                record[7] in STOPWORD_VERBS)
+
+    def is_stopword(self, text):
+        """
+        Determine whether a single word is a stopword, or whether a short
+        phrase is made entirely of stopwords, disregarding context.
+
+        Use of this function should be avoided; it's better to give the text
+        in context and let MeCab determine which words are the stopwords.
+        """
+        found_content_word = False
+        for record in self.analyze(text):
+            if not self._is_stopword_record(record):
+                found_content_word = True
+                break
+        return not found_content_word
+
+    def normalize_list(self, text):
+        """
+        Get a canonical list representation of Japanese text, with words
+        separated and reduced to their base forms.
+        """
+        words = []
+        analysis = self.analyze(text)
+        for record in analysis:
+            if not self._is_stopword_record(record):
+                words.append(record[0])
+        if not words:
+            # Don't discard stopwords if that's all you've got
+            words = [record[0] for record in analysis]
+        return words
+
+    def normalize(self, text):
+        """
+        Get a canonical string representation of Japanese text, like
+        :meth:`normalize_list` but joined with spaces.
+        """
+        return ' '.join(self.normalize_list(text))
 
 def NL():
-    return JaNL('ja')
-
-'''
---- Note ---
-    See csc.nl.ja.system for the internal structure of these tools
-'''
-
-class JaNL(NLTools):
-    def __init__(self, lang):
-        self.lang = lang
-
-    def utterance(self, stuff):
-        ''' Returns a JaUtterance representing the string
-        This should be your primary access if you want to use advanced features.
-        '''
-
-        try:
-            if   isinstance(stuff, JaLanguageNode): return stuff
-            elif isinstance(stuff, str):            return JaParser().parse_string(stuff)
-            elif isinstance(stuff, unicode):        return JaParser().parse_string(stuff)
-
-        except KeyboardInterrupt, e:
-            raise e
-
-        raise ValueError("Bad argument to a csc.nl.ja function.")
-
-    def is_stopword(self, word):
-        '''Returns whether or not the given word is a stopword. If the
-        given text falls apart into multiple words, it will check the
-        first.'''
-
-        words = self.utterance(word).words
-        if len(words) == 0:
-            # it's empty -- might as well be a stopword.
-            return True
-
-        return words[0].is_stopword
-
-    def stem_word(self, word):
-        ''' Returns an inflectionless version of the word '''
-
-        return ja_dec(self.word_split[0])
-
-    def __attached_suffixes(self, positive = True):
-        ''' Helper function for normalize and word_split (internal use) '''
-        suffix_forms = [ ja_enc('ない'), ja_enc('たい') ]
-
-        if positive == True:
-            return lambda x: x in suffix_forms
-        elif positive == False:
-            return lambda x: not (x in suffix_forms)
-        else:
-            return lambda x: True
-
-    def __normalize_suffixes(self, word, boolean):
-        ''' Returns suffixes of a word seperated by a nyoro (internal use).
-        Argument MUST be a JaWord
-        '''
-
-        lemma_join    = ja_enc('〜')
-        suffix_list   = [ s.lemma_form for s in word.suffixes ]
-        annotations   = filter(self.__attached_suffixes(boolean), suffix_list)
-        string        = lemma_join.join(annotations)
-
-        return ja_dec( lemma_join + string ) if string else unicode()
-
-    def __normalize_word(self, word, boolean):
-        ''' Normalize a word (internal use) '''
-        lemma  = ja_dec(word.lemma_form)
-        suffix = self.__normalize_suffixes(word, boolean)
-        return lemma + suffix
-
-    def __normalize_words(self, words):
-        ''' Normalize a list of words (internal use) '''
-        return ' '.join( self.__normalize_word(w, True) for w in words )
-
-    def word_split(self, word):
-        ''' Splits the word into a base and inflection '''
-
-        words = self.utterance(word).words
-        if len(words) == 0:
-            raise ValueError("Could not find a word to check.")
-        elif len(words) > 1:
-            raise ValueError("Multiple words found.")
-
-        word = words[0]
-
-        lemma  = self.__normalize_word(word, True)
-        suffix = self.__normalize_suffixes(word, False)
-
-        return ja_dec(lemma), ja_dec(suffix)
-
-    def normalize(self, stuff):
-        return ja_dec( self.__normalize_words(self.utterance(stuff).words) )
-
-    def lemma_split(self, stuff, keep_stopwords = False):
-        ''' Split the lemmas into two strings with stopwords separated '''
-
-        words = self.utterance(stuff).words
-
-        if keep_stopwords:
-            first = ' '.join( [ self.__normalize_word(w, True) for w in words ] )
-        else:
-            first = ' '.join( [ self.__normalize_word(w, True) for w in filter(lambda w: not w.is_stopword, words) ] )
-
-        second = []
-        index  = 0
-
-        for i, w in enumerate(words):
-            if not keep_stopwords and w.is_stopword:
-                second.append(self.__normalize_word(w, None))
-            else:
-                index    += 1
-                second.append(str(index) + self.__normalize_suffixes(w, False))
-
-        second = ' '.join(second)
-
-        return ja_dec(first), ja_dec(second)
-
-    def lemma_combine(self, lemmas, residue):
-        ''' Reverses lemma_split '''
-
-        # TODO: This is reasonably difficult to do with the information provided - future work #
-        return lemmas
-
-    def is_blacklisted(self, stuff):
-        ''' Returns True if the text is known to be bad '''
-
-        return False
-
-    def tokenize_list(self, stuff):
-        ''' Returns a list of token objects
-        They all support str() so convert them to strings if you like
-        '''
-
-        return self.utterance(stuff).words
-
-    def untokenize_list(self, token_list):
-        ''' Reverses tokenize_list '''
-
-        return token_list[0].top
-
-    def tokenize(self, stuff):
-        ''' Returns a string of tokens separted by spaces '''
-
-        return ' '.join( [ ja_dec(str(x)) for x in self.tokenize_list(stuff) ] )
-
-    def untokenize(self, stuff):
-        ''' Reverses tokenize '''
-
-        if isinstance(stuff, JaLanguageNode):
-            return ja_dec(stuff.surface)
-        else:
-            return re.sub(' ', '', ja_dec(stuff))
-
-    lemma_factor = lemma_split
-    normalize4   = normalize
+    return MeCabNL()
 
