@@ -95,16 +95,16 @@ class EuroNL(NLTools):
         input to do.
 
             >>> en_nl.tokenize("Time is an illusion. Lunchtime, doubly so.")
-            'Time is an illusion . Lunchtime , doubly so .'
+            u'Time is an illusion . Lunchtime , doubly so .'
             >>> untok = '''
             ... "Very deep," said Arthur, "you should send that in to the
             ... Reader's Digest. They've got a page for people like you."
             ... '''
             >>> tok = en_nl.tokenize(untok)
             >>> tok
-            "`` Very deep , '' said Arthur , `` you should send that in to the Reader 's Digest . They 've got a page for people like you . ''"
+            u"`` Very deep , '' said Arthur , `` you should send that in to the Reader 's Digest . They 've got a page for people like you . ''"
             >>> en_nl.untokenize(tok)
-            '"Very deep," said Arthur, "you should send that in to the Reader\'s Digest. They\'ve got a page for people like you."'
+            u'"Very deep," said Arthur, "you should send that in to the Reader\'s Digest. They\'ve got a page for people like you."'
             >>> en_nl.untokenize(tok) == untok.replace('\n', ' ').strip()
             True
 

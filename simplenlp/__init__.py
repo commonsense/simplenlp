@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import codecs
 import os
 import unicodedata
@@ -116,8 +117,9 @@ def preprocess_text(text):
     - Normalize it with Unicode normalization form KC, which applies the
       following relevant transformations:
       - Combines characters and diacritics that are written using separate
-        code points, such as converting "ka" plus a dakuten into the
-        single character "ga".
+        code points, such as converting "e" plus an acute accent modifier
+        into "é", or converting "ka" (か) plus a dakuten into the
+        single character "ga" (が).
       - Replaces characters that are functionally equivalent with the most
         common form: for example, half-width katakana will be replaced with
         full-width, and full-width Roman characters will be replaced with

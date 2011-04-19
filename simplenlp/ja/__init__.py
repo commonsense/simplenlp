@@ -17,18 +17,22 @@ STOPWORD_CATEGORIES = set([
     u'接尾',          # fine: suffix
 ])
 
-# Forms of particular verbs are also stopwords.
+# Forms of particular words are also stopwords.
 #
 # A thought: Should the rare kanji version of suru not be a stopword?
 # I'll need to ask someone who knows more Japanese, but it may be
 # that if they're using the kanji it's for particular emphasis.
-STOPWORD_VERBS = set([
-    u'する',          # suru: to do
+STOPWORD_ROOTS = set([
+    u'する',          # suru: "to do"
     u'為る',          # suru in kanji (very rare)
-    u'くる',          # kuru: to come
+    u'くる',          # kuru: "to come"
     u'来る',          # kuru in kanji
-    u'いく',          # iku: to go
+    u'いく',          # iku: "to go"
     u'行く',          # iku in kanji
+    u'もの',          # mono: "thing"
+    u'物',            # mono in kanji
+    u'よう',          # you: "way"
+    u'様',            # you in kanji
 ])
 
 class MeCabNL(DefaultNL):
@@ -45,31 +49,74 @@ class MeCabNL(DefaultNL):
         Create a MeCabNL object by opening a pipe to the mecab command.
         """
         self.mecab = subprocess.Popen(['mecab'], shell=True, bufsize=1, close_fds=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        self.mecab_encoding = 'utf-8'
+        self._detect_mecab_encoding()
     
     def __del__(self):
         """
         Clean up by closing the pipe.
         """
         self.mecab.stdin.close()
-        del self.mecab
     
+    def _detect_mecab_encoding(self):
+        """
+        Once we've found a MeCab binary, it may be installed in UTF-8 or it
+        may be installed in EUC-JP. We need to determine which one by
+        experimentation.
+        """
+        self.mecab.stdin.write(u'a\n')
+        out = self.mecab.stdout.readline()
+        
+        # out is now a string in an unknown encoding, and might not even be
+        # valid in *any* encoding before the tab character. But after the
+        # tab, it should all be in the encoding of the installed dictionary.
+
+        try:
+            out.decode('utf-8')
+        except UnicodeDecodeError:
+            try:
+                self.mecab_encoding = 'euc-jp'
+                out.decode('euc-jp')
+            except UnicodeDecodeError:
+                raise IOError("I can't understand MeCab in either UTF-8 or "
+                              "EUC-JP. Check the configuration of MeCab and "
+                              "its dictionary.")
+        assert self.mecab.stdout.readline() == 'EOS\n',\
+          "Sorry! I got unexpected lines back from MeCab and don't know what "\
+          "to do next."
+    
+    def get_record_root(self, record):
+        """
+        Given a MeCab record, return the root word.
+        """
+        if record[7] == '*':
+            return record[0]
+        else:
+            return record[7]
+
     def analyze(self, text):
         """
         Runs a line of text through MeCab, and returns the results as a
-        list of lists.
+        list of lists ("records") that contain the MeCab analysis of each
+        word.
         """
-        text = preprocess_text(text).encode('utf-8')
+        text = preprocess_text(text).encode(self.mecab_encoding)
         self.mecab.stdin.write(text+'\n')
         results = []
         out_line = ''
         while True:
-            out_line = self.mecab.stdout.readline()
-            if out_line == 'EOS\n':
+            out_line = self.mecab.stdout.readline().decode(self.mecab_encoding)
+            if out_line == u'EOS\n':
                 break
-            word, info = out_line.strip('\n').split('\t')
-            record = [word] + info.split(',')
-            unicode_record = [entry.decode('utf-8') for entry in record]
-            results.append(unicode_record)
+
+            word, info = out_line.strip(u'\n').split(u'\t')
+            record = [word] + info.split(u',')
+            
+            # special case for detecting nai -> n
+            if record[0] == u'ん' and record[5] == u'不変化型':
+                record[7] = record[0] = record[1] = u'ない'
+
+            results.append(record)
         return results
 
     def tokenize_list(self, text):
@@ -88,13 +135,13 @@ class MeCabNL(DefaultNL):
         """
         return u' '.join(self.tokenize_list(text))
     
-    def _is_stopword_record(self, record):
+    def is_stopword_record(self, record):
         """
         Determine whether a single MeCab record represents a stopword.
         """
         return (record[1] in STOPWORD_CATEGORIES or
                 record[2] in STOPWORD_CATEGORIES or
-                record[7] in STOPWORD_VERBS)
+                record[7] in STOPWORD_ROOTS)
 
     def is_stopword(self, text):
         """
@@ -106,7 +153,7 @@ class MeCabNL(DefaultNL):
         """
         found_content_word = False
         for record in self.analyze(text):
-            if not self._is_stopword_record(record):
+            if not self.is_stopword_record(record):
                 found_content_word = True
                 break
         return not found_content_word
@@ -119,8 +166,8 @@ class MeCabNL(DefaultNL):
         words = []
         analysis = self.analyze(text)
         for record in analysis:
-            if not self._is_stopword_record(record):
-                words.append(record[0])
+            if not self.is_stopword_record(record):
+                words.append(self.get_record_root(record))
         if not words:
             # Don't discard stopwords if that's all you've got
             words = [record[0] for record in analysis]

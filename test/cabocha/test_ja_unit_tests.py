@@ -1,7 +1,7 @@
 #python-encoding: UTF-8
 from conceptnet.models import Language, Sentence
-from simplenlp.ja.system import *
-from simplenlp.ja.debug  import *
+from simplenlp.ja_cabocha.system import *
+from simplenlp.ja_cabocha.debug  import *
 import operator
 
 # Import the data for our test #
