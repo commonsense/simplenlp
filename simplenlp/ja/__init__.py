@@ -114,7 +114,7 @@ class MeCabNL(DefaultNL):
             
             # special case for detecting nai -> n
             if record[0] == u'ん' and record[5] == u'不変化型':
-                record[7] = record[0] = record[1] = u'ない'
+                record[7] = record[1] = u'ない'
 
             results.append(record)
         return results
@@ -179,6 +179,27 @@ class MeCabNL(DefaultNL):
         :meth:`normalize_list` but joined with spaces.
         """
         return ' '.join(self.normalize_list(text))
+
+    def extract_phrases(self, text):
+        """
+        Given some text, extract phrases of up to 2 content words,
+        and map their normalized form to the complete phrase.
+        """
+        analysis = self.analyze(text)
+        for pos1 in xrange(len(analysis)):
+            rec1 = analysis[pos1]
+            if not self.is_stopword_record(rec1):
+                yield self.get_record_root(rec1), rec1[0]
+                for pos2 in xrange(pos1+1, len(analysis)):
+                    rec2 = analysis[pos2]
+                    if not self.is_stopword_record(rec2):
+                        roots = [self.get_record_root(pos1),
+                                 self.get_record_root(pos2)]
+                        pieces = [analysis[i][0] for i in xrange(pos1, pos2+1)]
+                        term = ' '.join(roots)
+                        phrase = ''.join(pieces)
+                        yield term, phrase
+                        break
 
 def NL():
     return MeCabNL()
