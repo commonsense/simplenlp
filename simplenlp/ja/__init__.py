@@ -193,8 +193,8 @@ class MeCabNL(DefaultNL):
                 for pos2 in xrange(pos1+1, len(analysis)):
                     rec2 = analysis[pos2]
                     if not self.is_stopword_record(rec2):
-                        roots = [self.get_record_root(pos1),
-                                 self.get_record_root(pos2)]
+                        roots = [self.get_record_root(rec1),
+                                 self.get_record_root(rec2)]
                         pieces = [analysis[i][0] for i in xrange(pos1, pos2+1)]
                         term = ' '.join(roots)
                         phrase = ''.join(pieces)
