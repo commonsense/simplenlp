@@ -203,4 +203,5 @@ class MeCabNL(DefaultNL):
 
 def NL():
     return MeCabNL()
+NL = MeCabNL
 
