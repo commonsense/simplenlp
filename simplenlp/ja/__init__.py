@@ -180,6 +180,5 @@ class MeCabNL(DefaultNL):
         """
         return ' '.join(self.normalize_list(text))
 
-def NL():
-    return MeCabNL()
+NL = MeCabNL
 
