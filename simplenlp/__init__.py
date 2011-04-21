@@ -10,10 +10,10 @@ nl_base = os.path.dirname(__file__)
 CONTROL_CHARS = {}
 for i in xrange(256):
     if unicodedata.category(unichr(i)) == 'Cc':
-        CONTROL_CHARS[unichr(i)] = None
+        CONTROL_CHARS[i] = None
 
-CONTROL_CHARS['\t'] = ' '
-CONTROL_CHARS['\n'] = ' '
+CONTROL_CHARS[ord('\t')] = u' '
+CONTROL_CHARS[ord('\n')] = u' '
 
 def get_wordlist(lang, listname):
     try:

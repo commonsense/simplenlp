@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from csc.nl import DefaultNL, preprocess_text
+from simplenlp import DefaultNL, preprocess_text
 import subprocess
 
 # MeCab outputs the part of speech of its terms. We can simply identify
@@ -51,11 +51,15 @@ class MeCabNL(DefaultNL):
         self.mecab = subprocess.Popen(['mecab'], shell=True, bufsize=1, close_fds=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         self.mecab_encoding = 'utf-8'
         self._detect_mecab_encoding()
+        #self.input_log = open('mecab-in.txt', 'w')
+        #self.output_log = open('mecab-out.txt', 'w')
     
     def __del__(self):
         """
         Clean up by closing the pipe.
         """
+        #self.input_log.close()
+        #self.output_log.close()
         self.mecab.stdin.close()
     
     def _detect_mecab_encoding(self):
@@ -102,10 +106,14 @@ class MeCabNL(DefaultNL):
         """
         text = preprocess_text(text).encode(self.mecab_encoding)
         self.mecab.stdin.write(text+'\n')
+        #self.input_log.write(text+'\n')
         results = []
         out_line = ''
         while True:
-            out_line = self.mecab.stdout.readline().decode(self.mecab_encoding)
+            out_line = self.mecab.stdout.readline()
+            #self.output_log.write(out_line)
+            out_line = out_line.decode(self.mecab_encoding)
+
             if out_line == u'EOS\n':
                 break
 
