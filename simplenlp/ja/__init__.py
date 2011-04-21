@@ -104,7 +104,7 @@ class MeCabNL(DefaultNL):
         list of lists ("records") that contain the MeCab analysis of each
         word.
         """
-        text = preprocess_text(text).encode(self.mecab_encoding)
+        text = preprocess_text(text).lower().encode(self.mecab_encoding)
         self.mecab.stdin.write(text+'\n')
         #self.input_log.write(text+'\n')
         results = []
