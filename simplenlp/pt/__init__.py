@@ -1,4 +1,4 @@
-from csc.nl.euro import StemmedEuroNL
+from simplenlp.euro import StemmedEuroNL
 
 def NL():
     return StemmedEuroNL('pt')

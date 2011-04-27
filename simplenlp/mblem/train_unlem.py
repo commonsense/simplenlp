@@ -1,4 +1,4 @@
-from csc.nl.mblem import get_mblem
+from simplenlp.mblem import get_mblem
 from collections import defaultdict
 
 stems = defaultdict(lambda: defaultdict(list))

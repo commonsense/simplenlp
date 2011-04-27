@@ -1,4 +1,4 @@
-from csc.nl.euro import LemmatizedEuroNL
+from simplenlp.euro import LemmatizedEuroNL
 
 # FIXME: this global is a temporary hack.
 EXTRA_STOPWORDS = ['also', 'not', 'without', 'ever', 'because', 'then', 'than', 'do', 'just', 'how', 'out', 'much', 'both', 'other']
