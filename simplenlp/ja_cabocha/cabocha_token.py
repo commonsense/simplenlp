@@ -1,8 +1,8 @@
 #python-encoding: utf-8
 
-from csc.nl.ja.debug import *
-from csc.nl.ja.util  import *
-from csc.nl.ja.tree  import *
+from simplenlp.ja_cabocha.debug import *
+from simplenlp.ja_cabocha.util  import *
+from simplenlp.ja_cabocha.tree  import *
 
 import MeCab
 import CaboCha

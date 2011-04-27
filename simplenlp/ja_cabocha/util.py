@@ -1,6 +1,6 @@
 #python-encoding: UTF-8
 
-from csc.nl import NLTools, get_nl
+from simplenlp import NLTools, get_nl
 import re
 
 def ja_enc(string):

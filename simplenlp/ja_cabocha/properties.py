@@ -1,6 +1,6 @@
 #python-encoding: UTF-8
 
-from csc.nl.ja.util import *
+from simplenlp.ja_cabocha.util import *
 import re
 import operator
 

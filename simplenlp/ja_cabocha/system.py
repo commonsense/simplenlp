@@ -1,8 +1,8 @@
 #python-encoding: UTF-8
 
-from csc.nl.ja.debug import *
-from csc.nl.ja.util  import *
-from csc.nl.ja.tree  import *
+from simplenlp.ja_cabocha.debug import *
+from simplenlp.ja_cabocha.util  import *
+from simplenlp.ja_cabocha.tree  import *
 
 import MeCab
 import CaboCha
@@ -61,9 +61,9 @@ However, the lists themselves are unique.
   checks on token.pos_string, where you can query the actual data returned.
 '''
 
-from csc.nl.ja.parser import *
-from csc.nl.ja.utterance import *
-from csc.nl.ja.cabocha_token import *
-from csc.nl.ja.word import *
-from csc.nl.ja.chunk import *
+from simplenlp.ja_cabocha.parser import *
+from simplenlp.ja_cabocha.utterance import *
+from simplenlp.ja_cabocha.cabocha_token import *
+from simplenlp.ja_cabocha.word import *
+from simplenlp.ja_cabocha.chunk import *
 

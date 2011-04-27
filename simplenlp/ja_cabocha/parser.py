@@ -1,7 +1,7 @@
 #python-encoding: utf-8
-from csc.nl.ja.debug import *
-from csc.nl.ja.util  import *
-from csc.nl.ja.tree  import *
+from simplenlp.ja_cabocha.debug import *
+from simplenlp.ja_cabocha.util  import *
+from simplenlp.ja_cabocha.tree  import *
 
 import MeCab
 import CaboCha
@@ -539,8 +539,8 @@ class JaParser():
         node.conj_form  = None
         node.infl_type  = None
 
-from csc.nl.ja.cabocha_token import *
-from csc.nl.ja.word          import *
-from csc.nl.ja.chunk         import *
-from csc.nl.ja.utterance     import *
+from simplenlp.ja_cabocha.cabocha_token import *
+from simplenlp.ja_cabocha.word          import *
+from simplenlp.ja_cabocha.chunk         import *
+from simplenlp.ja_cabocha.utterance     import *
 

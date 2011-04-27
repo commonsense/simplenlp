@@ -8,11 +8,11 @@ You do not have the MeCab library available, so you cannot use the Japanese
 NLTools.
 
 See csc/nl/ja/README.TXT for instructions on how to set up MeCab.""")
-from csc.nl import NLTools, get_nl
-from csc.nl.ja.parser import JaParser
-from csc.nl.ja.tree import JaLanguageNode
-from csc.nl.ja.util import ja_enc, ja_dec
-from csc.nl.ja.word import JaWord
+from simplenlp import NLTools, get_nl
+from simplenlp.ja_cabocha.parser import JaParser
+from simplenlp.ja_cabocha.tree import JaLanguageNode
+from simplenlp.ja_cabocha.util import ja_enc, ja_dec
+from simplenlp.ja_cabocha.word import JaWord
 import string
 import re
 
@@ -21,7 +21,7 @@ def NL():
 
 '''
 --- Note ---
-    See csc.nl.ja.system for the internal structure of these tools
+    See simplenlp.ja_cabocha.system for the internal structure of these tools
 '''
 
 class JaNL(NLTools):
@@ -41,7 +41,7 @@ class JaNL(NLTools):
         except KeyboardInterrupt, e:
             raise e
 
-        raise ValueError("Bad argument to a csc.nl.ja function.")
+        raise ValueError("Bad argument to a simplenlp.ja_cabocha function.")
 
     def is_stopword(self, word):
         '''Returns whether or not the given word is a stopword. If the
