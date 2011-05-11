@@ -104,27 +104,30 @@ class MeCabNL(DefaultNL):
         list of lists ("records") that contain the MeCab analysis of each
         word.
         """
-        text = preprocess_text(text).lower().encode(self.mecab_encoding)
-        self.mecab.stdin.write(text+'\n')
-        #self.input_log.write(text+'\n')
+        text = preprocess_text(text).lower()
+        n_chunks = (len(text)+1024)//1024
         results = []
-        out_line = ''
-        while True:
-            out_line = self.mecab.stdout.readline()
-            #self.output_log.write(out_line)
-            out_line = out_line.decode(self.mecab_encoding)
+        for chunk in xrange(n_chunks):
+            chunk_text = text[chunk*1024:(chunk+1)*1024].encode(self.mecab_encoding)
+            self.mecab.stdin.write(chunk_text+'\n')
+            #self.input_log.write(text+'\n')
+            out_line = ''
+            while True:
+                out_line = self.mecab.stdout.readline()
+                #self.output_log.write(out_line)
+                out_line = out_line.decode(self.mecab_encoding)
 
-            if out_line == u'EOS\n':
-                break
+                if out_line == u'EOS\n':
+                    break
 
-            word, info = out_line.strip(u'\n').split(u'\t')
-            record = [word] + info.split(u',')
-            
-            # special case for detecting nai -> n
-            if record[0] == u'ん' and record[5] == u'不変化型':
-                record[7] = record[1] = u'ない'
+                word, info = out_line.strip(u'\n').split(u'\t')
+                record = [word] + info.split(u',')
+                
+                # special case for detecting nai -> n
+                if record[0] == u'ん' and record[5] == u'不変化型':
+                    record[7] = record[1] = u'ない'
 
-            results.append(record)
+                results.append(record)
         return results
 
     def tokenize_list(self, text):
