@@ -1,10 +1,10 @@
 #python-encoding: UTF-8
 
-from csc.nl.ja.util  import *
+from simplenlp.ja_cabocha.util  import *
 import re
 
 class JaDebug():
-    ''' Handles Debug Output for csc.nl.ja
+    ''' Handles Debug Output for simplenlp.ja_cabocha
     Note: Not pretty.  Probably never will be.
     '''
 

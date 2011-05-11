@@ -2,7 +2,7 @@
 from amara import binderytools
 import pickle, os
 from collections import defaultdict
-from csc.nl.mblem.trie import Leaf, Node, default_trie
+from simplenlp.mblem.trie import Leaf, Node, default_trie
 
 # English permutation:
 # 20, 19, 1, 18, 2, 3, 17, 4, 5, 6, 7, 16, 8, 9, 15, 10, 14, 11, 13, 12

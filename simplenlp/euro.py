@@ -304,10 +304,10 @@ class LemmatizedEuroNL(EuroNL):
         """
         The `.lemmatizer` property lazily loads an MBLEM lemmatizer from the
         disk. The resulting object is an instance of
-        :class:`csc.nl.mblem.trie.Trie`.
+        :class:`simplenlp.mblem.trie.Trie`.
         """
         if not hasattr(self, '_lemmatizer'):
-            from csc.nl.mblem import get_mblem
+            from simplenlp.mblem import get_mblem
             self._lemmatizer = get_mblem(self.lang)
         return self._lemmatizer
 
@@ -320,7 +320,7 @@ class LemmatizedEuroNL(EuroNL):
         added.
         """
         if not hasattr(self, '_unlemmatizer'):
-            from csc.nl.mblem import get_unlem
+            from simplenlp.mblem import get_unlem
             self._unlemmatizer = get_unlem(self.lang)
         return self._unlemmatizer
 

@@ -1,4 +1,4 @@
-from csc.nl import DefaultNL
+from simplenlp import DefaultNL
 
 def NL():
     return DefaultNL()

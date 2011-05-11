@@ -1,6 +1,6 @@
-from csc.nl.ja.debug import *
-from csc.nl.ja.util  import *
-from csc.nl.ja.tree  import *
+from simplenlp.ja_cabocha.debug import *
+from simplenlp.ja_cabocha.util  import *
+from simplenlp.ja_cabocha.tree  import *
 
 import MeCab
 import CaboCha
@@ -25,7 +25,7 @@ class JaUtterance(JaTreeBranch, JaLanguageNode):
     def is_utterance(self):
         return True
 
-from csc.nl.ja.chunk  import *
-from csc.nl.ja.cabocha_token  import *
-from csc.nl.ja.parser import *
+from simplenlp.ja_cabocha.chunk  import *
+from simplenlp.ja_cabocha.cabocha_token  import *
+from simplenlp.ja_cabocha.parser import *
 

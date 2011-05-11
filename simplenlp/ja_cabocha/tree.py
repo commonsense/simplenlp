@@ -1,7 +1,7 @@
 #python-encoding: UTF-8
 
-from csc.nl.ja.util       import *
-from csc.nl.ja.properties import *
+from simplenlp.ja_cabocha.util       import *
+from simplenlp.ja_cabocha.properties import *
 
 class JaTreeNode():
     ''' Things common to tree nodes '''

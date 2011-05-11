@@ -5,7 +5,7 @@ Simple, multilingual natural language tools.
 
 This package accomplishes many basic NLP tasks without dependencies on NLTK or parsers, for use in projects such as ConceptNet.
 """
-languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
+languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
 packages = ['simplenlp', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
 
 version_str = '1.0.2'
