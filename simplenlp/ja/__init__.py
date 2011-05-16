@@ -2,6 +2,8 @@
 from simplenlp import DefaultNL, preprocess_text
 import subprocess
 
+class MeCabError(Exception): pass
+
 # MeCab outputs the part of speech of its terms. We can simply identify
 # particular (coarse or fine) parts of speech as containing stopwords.
 
@@ -48,7 +50,11 @@ class MeCabNL(DefaultNL):
         """
         Create a MeCabNL object by opening a pipe to the mecab command.
         """
-        self.mecab = subprocess.Popen(['mecab'], shell=True, bufsize=1, close_fds=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        try:
+            self.mecab = subprocess.Popen(['mecab'], bufsize=1, close_fds=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        except OSError:
+            raise MeCabError("`mecab` didn't start. See README.txt for details "
+                             "about installing MeCab and other Japanese NLP tools.")
         self.mecab_encoding = 'utf-8'
         self._detect_mecab_encoding()
         #self.input_log = open('mecab-in.txt', 'w')
@@ -60,7 +66,8 @@ class MeCabNL(DefaultNL):
         """
         #self.input_log.close()
         #self.output_log.close()
-        self.mecab.stdin.close()
+        if hasattr(self, 'mecab'):
+            self.mecab.stdin.close()
     
     def _detect_mecab_encoding(self):
         """
@@ -82,12 +89,12 @@ class MeCabNL(DefaultNL):
                 self.mecab_encoding = 'euc-jp'
                 out.decode('euc-jp')
             except UnicodeDecodeError:
-                raise IOError("I can't understand MeCab in either UTF-8 or "
-                              "EUC-JP. Check the configuration of MeCab and "
-                              "its dictionary.")
-        assert self.mecab.stdout.readline() == 'EOS\n',\
-          "Sorry! I got unexpected lines back from MeCab and don't know what "\
-          "to do next."
+                raise MeCabError("I can't understand MeCab in either UTF-8 or "
+                                 "EUC-JP. Check the configuration of MeCab and "
+                                 "its dictionary.")
+        if self.mecab.stdout.readline() != 'EOS\n':
+            raise MeCabError("Sorry! I got unexpected lines back from MeCab "
+                             "and don't know what to do next.")
     
     def get_record_root(self, record):
         """
