@@ -51,7 +51,7 @@ setup(
     version=version_str,
     maintainer='MIT Media Lab, Software Agents group',
     maintainer_email='conceptnet@media.mit.edu',     
-    url='http://csc.media.mit.edu/',
+    url='http://github.com/commonsense/simplenlp/',
     license = "http://www.gnu.org/copyleft/gpl.html",
     platforms = ["any"],
     description = doclines[0],
