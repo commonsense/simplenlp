@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 
-"""
-Simple, multilingual natural language tools.
-
-This package accomplishes many basic NLP tasks without dependencies on NLTK or parsers, for use in projects such as ConceptNet.
-"""
 languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
 packages = ['simplenlp', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
 
 version_str = '1.0.3'
 
 try:
-    from setuptools import setup, Extension, find_packages
+    from setuptools import setup, find_packages
 
     # Verify the list of packages.
     setuptools_packages = find_packages(exclude=[])
@@ -20,13 +15,10 @@ try:
         print >>sys.stderr, 'Missing or extraneous packages found.'
         print >>sys.stderr, 'Extraneous:', list(set(packages) - set(setuptools_packages))
         print >>sys.stderr, 'Missing:', list(set(setuptools_packages) - set(packages))
-        #sys.exit(1)
+        raw_input()
 
 except ImportError:
-    from distutils.core import setup, Extension
-
-import os.path, sys
-from stat import ST_MTIME
+    from distutils.core import setup
 
 classifiers=[
     'Intended Audience :: Developers',
@@ -44,7 +36,9 @@ classifiers=[
     'Topic :: Software Development',
     'Topic :: Text Processing :: Linguistic',]
 
-doclines = __doc__.split("\n")
+import os
+README_contents = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+doclines = README_contents.split("\n")
 
 setup(
     name="simplenlp",
