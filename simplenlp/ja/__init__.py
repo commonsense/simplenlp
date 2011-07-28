@@ -176,10 +176,12 @@ class MeCabNL(DefaultNL):
                 break
         return not found_content_word
 
-    def normalize_list(self, text):
+    def normalize_list(self, text, cache=None):
         """
         Get a canonical list representation of Japanese text, with words
         separated and reduced to their base forms.
+
+        TODO: use the cache.
         """
         words = []
         analysis = self.analyze(text)
@@ -191,10 +193,12 @@ class MeCabNL(DefaultNL):
             words = [record[0] for record in analysis]
         return words
 
-    def normalize(self, text):
+    def normalize(self, text, cache=None):
         """
         Get a canonical string representation of Japanese text, like
         :meth:`normalize_list` but joined with spaces.
+
+        TODO: use the cache.
         """
         return ' '.join(self.normalize_list(text))
 

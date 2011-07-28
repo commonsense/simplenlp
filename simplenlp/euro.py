@@ -425,7 +425,7 @@ class LemmatizedEuroNL(EuroNL):
         return (u' '.join(lemmas), u' '.join(residue))
     lemma_factor = lemma_split
 
-    def normalize(self, text):
+    def normalize(self, text, cache=None):
         """
         When you *normalize* a string (no relation to the operation of
         normalizing a vector), you remove its stopwords and inflections so that
@@ -437,8 +437,35 @@ class LemmatizedEuroNL(EuroNL):
 
             >>> en_nl.normalize("This is the testiest test that ever was tested")
             u'testy test ever test'
+        
+        This is a subset of the operations performed by :meth:`lemma_split`.
         """
-        return self.lemma_split(text)[0]
+        return u' '.join(self.normalize_list(text, cache))
+
+    def normalize_list(self, text, cache=None, keep_stopwords=False):
+        """
+        The core operation of :meth:`normalize`, returning its results
+        as a list.
+        """
+        if cache is not None and text in cache:
+            return cache[text]
+
+        if not isinstance(text, unicode): text = text.decode('utf-8')
+        words = self.tokenize_and_correct(text)
+
+        punct = string.punctuation.replace("'", "").replace('-', '').replace("`", "")        
+        lemma_tuples = [self.word_split(word.strip(punct)) for word in words]
+        lemmas = []
+        for i in range(len(words)):
+            if keep_stopwords or words[i] not in self.stopwords:
+                lemmas.append(lemma_tuples[i][0])
+        lemmas = [self.swapdict.get(lemma, lemma) for lemma in lemmas]
+        if len(lemmas) == 0 and not keep_stopwords:
+            lemmas = self.normalize_list(text, cache, keep_stopwords=True)
+        if cache is not None and len(lemmas) <= 3:
+            cache[text] = lemmas
+        return lemmas
+
     normalize4 = normalize
 
     def lemma_combine(self, lemmas, residue):
