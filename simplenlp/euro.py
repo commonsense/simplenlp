@@ -3,6 +3,16 @@ from simplenlp import NLTools, get_nl, get_wordlist, get_mapping,\
                       preprocess_text
 import re
 
+tokenizer_regexes = [
+    ('"([^"]*)"', r" `` \1 '' "),
+    (r'([.,:;?!%]+) ', r" \1 "),
+    (r'([.,:;?!%]+)$', r" \1"),
+    (r'([()])', r" \1 "),
+    (r'  +', ' ')]
+
+compiled_tokenizer_regexes = [(re.compile(regex), replacement)
+                              for regex, replacement in tokenizer_regexes]
+
 def doctest_globals():
     en_nl = get_nl('en')
     return locals()
@@ -110,13 +120,11 @@ class EuroNL(NLTools):
 
         """
         step0 = preprocess_text(text).replace('\r', '').replace('\n', ' ')
-        step1 = step0.replace(" '", " ` ").replace("'", " '").replace("n 't", 
+        cur = step0.replace(" '", " ` ").replace("'", " '").replace("n 't",
         " n't").replace("cannot", "can not")
-        step2 = re.sub('"([^"]*)"', r" `` \1 '' ", step1)
-        step3 = re.sub(r'([.,:;?!%]+) ', r" \1 ", step2)
-        step4 = re.sub(r'([.,:;?!%]+)$', r" \1", step3)
-        step5 = re.sub(r'([()])', r" \1 ", step4)
-        return re.sub(r'  +', ' ', step5).strip()
+        for regex, replacement in compiled_tokenizer_regexes:
+            cur = regex.sub(replacement, cur)
+        return cur.strip()
 
     def untokenize(self, text):
         """
