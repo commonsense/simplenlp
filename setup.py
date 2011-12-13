@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
+languages = ['ar', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ja_cabocha', 'ko', 'nl', 'pt', 'ru', 'zh']
 packages = ['simplenlp', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
 
 version_str = '1.0.3'
