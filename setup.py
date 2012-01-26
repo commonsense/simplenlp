@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 languages = ['ar', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ja_cabocha', 'ko', 'nl', 'pt', 'ru', 'zh']
-packages = ['simplenlp', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
+packages = ['simplenlp', 'simplenlp.default', 'simplenlp.mblem'] + ['simplenlp.'+lang for lang in languages]
 
-version_str = '1.0.3'
+version_str = '1.1'
 
 try:
     from setuptools import setup, find_packages

@@ -91,7 +91,7 @@ class DefaultNL(NLTools):
     implements all the NLTools methods in ways that do nothing in particular.
     """
     def __init__(self): pass
-    def is_stopword(self): return False
+    def is_stopword(self, word): return False
     def stem_word(self, stuff): return stuff
     def normalize(self, stuff): return stuff
     normalize4 = normalize
