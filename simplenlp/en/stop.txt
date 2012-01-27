@@ -35,7 +35,6 @@ each
 for
 from
 generally
-get
 had
 has
 have
