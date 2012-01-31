@@ -378,8 +378,10 @@ class LemmatizedEuroNL(EuroNL):
         words1 = text.replace('/', ' ').split()
         words2 = [w.lower() for w in words1]
         words3 = [self.autocorrect.get(word, word) for word in words2]
-        words = self.tokenize(' '.join(words3)).split()
-        return words
+        words4 = []
+        for corrected in words3:
+            words4.extend(corrected.split())
+        return words4
         
     def lemma_split(self, text, keep_stopwords=False):
         """
