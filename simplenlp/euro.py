@@ -252,7 +252,7 @@ class EuroNL(NLTools):
         '''
         text = self.tokenize(text)
         punct = self.punctuation
-        words = text.replace('/', ' ').split()
+        words = text.split()
         words = (w.strip(punct).lower() for w in words)
         words = (self.autocorrect.get(word, word) for word in words if word)
         if strip_stopwords:
@@ -375,7 +375,7 @@ class LemmatizedEuroNL(EuroNL):
         Apply autocorrection to a text while splitting it into tokens.
         """
         text = self.tokenize(text)
-        words1 = text.replace('/', ' ').split()
+        words1 = text.split()
         words2 = [w.lower() for w in words1]
         words3 = [self.autocorrect.get(word, word) for word in words2]
         words4 = []
@@ -532,7 +532,7 @@ class StemmedEuroNL(EuroNL):
     def normalize(self, text):
         if not isinstance(text, unicode): text = text.decode('utf-8')
         punct = string.punctuation.replace("'", "")
-        words = text.replace('/', ' ').replace('-', ' ').split()
+        words = text.replace('-', ' ').split()
         words = [w.strip(punct).lower() for w in words]
         words = [w for w in words if not self.is_stopword(w)]
         words = [self.stem_word(w) for w in words]
