@@ -4,11 +4,14 @@ from simplenlp import NLTools, get_nl, get_wordlist, get_mapping,\
 import re
 
 tokenizer_regexes = [
-    ('"([^"]*)"', r" `` \1 '' "),
-    (r'([.,:;?!%]+) ', r" \1 "),
-    (r'([.,:;?!%]+)$', r" \1"),
-    (r'([()])', r" \1 "),
-    (r'  +', ' ')]
+    ('"([^"]*)"', r" `` \1 '' "),         # transform quotation marks
+    (r'([.,:;^_*?!%()\[\]{}][-.,:;^_*?!%()\[\]{}]*) ', r" \1 "),  # sequences of punctuation
+    (r'([.,:;^_*?!%()\[\]{}][-.,:;^_*?!%()\[\]{}]*)$', r" \1"),   # final sequences of punctuation
+    (r'([*$(]+)(\w)', r"\1 \2"),          # word-preceding punctuation
+    (r'(\.\.+)(\w)', r" \1 \2"),          # ellipses
+    (r'(--+)(\w)', r" \1 \2"),            # long dashes
+    (r' ([.?!])([()\[\]{}])', r" \1 \2"),   # ending punctuation + parentheses
+    (r'  +', ' ')]                        # squish extra spaces
 
 compiled_tokenizer_regexes = [(re.compile(regex), replacement)
                               for regex, replacement in tokenizer_regexes]
@@ -250,7 +253,7 @@ class EuroNL(NLTools):
         '''
         text = self.tokenize(text)
         punct = self.punctuation
-        words = text.replace('/', ' ').split()
+        words = text.split()
         words = (w.strip(punct).lower() for w in words)
         words = (self.autocorrect.get(word, word) for word in words if word)
         if strip_stopwords:
@@ -373,11 +376,13 @@ class LemmatizedEuroNL(EuroNL):
         Apply autocorrection to a text while splitting it into tokens.
         """
         text = self.tokenize(text)
-        words1 = text.replace('/', ' ').split()
+        words1 = text.split()
         words2 = [w.lower() for w in words1]
         words3 = [self.autocorrect.get(word, word) for word in words2]
-        words = self.tokenize(' '.join(words3)).split()
-        return words
+        words4 = []
+        for corrected in words3:
+            words4.extend(corrected.split())
+        return words4
         
     def lemma_split(self, text, keep_stopwords=False):
         """
@@ -528,7 +533,7 @@ class StemmedEuroNL(EuroNL):
     def normalize(self, text):
         if not isinstance(text, unicode): text = text.decode('utf-8')
         punct = string.punctuation.replace("'", "")
-        words = text.replace('/', ' ').replace('-', ' ').split()
+        words = text.replace('-', ' ').split()
         words = [w.strip(punct).lower() for w in words]
         words = [w for w in words if not self.is_stopword(w)]
         words = [self.stem_word(w) for w in words]
