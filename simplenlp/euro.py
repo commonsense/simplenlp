@@ -532,6 +532,5 @@ class StemmedEuroNL(EuroNL):
         words = [w.strip(punct).lower() for w in words]
         words = [w for w in words if not self.is_stopword(w)]
         words = [self.stem_word(w) for w in words]
-        words.sort()
         return u" ".join(words)
 
