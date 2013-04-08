@@ -23,3 +23,5 @@ manchen
 mancher
 manches
 zu
+zum
+zur
